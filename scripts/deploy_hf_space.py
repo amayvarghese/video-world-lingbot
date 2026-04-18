@@ -38,11 +38,13 @@ def main() -> int:
 
     api = HfApi(token=token)
     print(f"Ensuring Space exists: {repo_id} …")
+    # Must be "docker" so the Hub runs our Dockerfile. "gradio" uses the managed
+    # Python 3.13 image and ignores Dockerfile — that path hit diffusers/lingbot-world conflicts.
     api.create_repo(
         repo_id=repo_id,
         repo_type="space",
         private=False,
-        space_sdk="gradio",
+        space_sdk="docker",
         exist_ok=True,
     )
 

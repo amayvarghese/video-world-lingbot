@@ -47,6 +47,23 @@ python scripts/deploy_hf_space.py
 
 If your Hugging Face username is **not** `amayvarghese`, set `HF_USERNAME` so the Space is created under your account.
 
+### Build troubleshooting (Spaces)
+
+**Symptom:** Build log shows `FROM docker.io/library/python:3.13` and one `RUN` that installs **both** `-r requirements.txt` **and** `gradio[oauth]==4.44.1` … `spaces` in the same command.
+
+**Meaning:** Hugging Face is using the **managed Gradio SDK image**, not this repo’s **Dockerfile**. That path ignores `Dockerfile`, uses **Python 3.13**, and if an older `requirements.txt` is present you get the `lingbot-world` vs `diffusers` resolver error.
+
+**Fix:**
+
+1. Space → **Settings**.
+2. Set **SDK** (sometimes labeled **Space software** / **Builder**) to **Docker**, save.
+3. Confirm **Files** shows `Dockerfile` at the repo root and README front matter has `sdk: docker` (true on `main` of [`amayvarghese/video-world-lingbot`](https://github.com/amayvarghese/video-world-lingbot)).
+4. **Factory reboot** (or push any commit) to rebuild.
+
+**Healthy Docker build:** the image base should be **`python:3.11-slim`** (from this repo’s `Dockerfile`), not `python:3.13`.
+
+Spaces first created with an older `deploy_hf_space.py` used `space_sdk="gradio"`; the script now uses **`docker`**, but existing Spaces must be switched to Docker in Settings once.
+
 ## Model and links
 
 - **Weights:** [robbyant/lingbot-world-base-cam](https://huggingface.co/robbyant/lingbot-world-base-cam) (Apache 2.0)
