@@ -3,9 +3,10 @@ title: video-world-lingbot
 emoji: 🌍
 colorFrom: blue
 colorTo: purple
-sdk: gradio
-sdk_version: 4.44.1
+sdk: docker
+app_port: 7860
 app_file: app.py
+suggested_hardware: a10g-large
 pinned: false
 license: apache-2.0
 ---
@@ -20,15 +21,17 @@ This Space is a Gradio front-end for **LingBot-World**, an open image-to-video w
 
 The public URL will be: `https://huggingface.co/spaces/<your_hf_username>/video-world-lingbot`
 
+This repo uses the **`docker` SDK** (see `Dockerfile`): installs compatible **`diffusers` / `transformers`** pins, then **`lingbot-world` with `--no-deps`** so **`flash_attn` is not required** at build time (the app uses PyTorch SDPA instead).
+
 ### Option A — Create from the website (recommended)
 
 1. Open [Create new Space](https://huggingface.co/new-space).
 2. **Space name:** `video-world-lingbot` (must match this slug if you want the same URL).
-3. **SDK:** Gradio.
-4. **Hardware:** choose a **GPU** tier large enough for LingBot-World (multi‑GB weights; expect long first build).
-5. **Repo:** either leave empty and paste files, or under **“Import from GitHub”** pick  
-   [`amayvarghese/video-world-lingbot`](https://github.com/amayvarghese/video-world-lingbot), branch **`main`**, so the Space stays in sync with GitHub.
-6. Save — Hugging Face will run `pip install -r requirements.txt` from the repo root.
+3. **SDK:** **Docker** (or import from GitHub — the README front matter sets `sdk: docker`).
+4. **Hardware:** pick a **large GPU** (e.g. A10G / L4); this model is multi‑GB and needs VRAM.
+5. **Repo:** under **“Import from GitHub”** pick  
+   [`amayvarghese/video-world-lingbot`](https://github.com/amayvarghese/video-world-lingbot), branch **`main`**.
+6. After each push, the Space rebuilds from the `Dockerfile` (first build can take a long time).
 
 ### Option B — Push from your machine (CLI)
 

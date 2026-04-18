@@ -1,11 +1,15 @@
+# Aligned with upstream lingbot-world (see robbyant/lingbot-world pyproject.toml).
+# LingBot code is installed separately with --no-deps (see Dockerfile) to skip flash_attn.
 torch>=2.1.0
 torchvision
-gradio==4.44.1
+gradio[oauth]==4.44.1
 gradio-client==1.3.0
-huggingface_hub>=0.23.0,<0.25.0
-diffusers>=0.27.0,<0.31.0
-transformers>=4.40.0,<4.46.0
-accelerate>=0.27.0
+uvicorn>=0.14.0
+websockets>=10.4
+huggingface_hub>=0.23.0,<1.0.0
+diffusers>=0.31.0,<0.40.0
+transformers>=4.49.0,<=4.51.3
+accelerate>=1.1.1
 imageio[ffmpeg]
 spaces
 numpy>=1.23.5,<2.0.0
@@ -18,4 +22,6 @@ ftfy
 regex
 tqdm
 imageio-ffmpeg
-lingbot-world @ git+https://github.com/robbyant/lingbot-world.git
+tokenizers>=0.20.3
+safetensors
+protobuf
