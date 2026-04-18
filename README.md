@@ -1,5 +1,5 @@
 ---
-title: LingBot World Demo
+title: video-world-lingbot
 emoji: 🌍
 colorFrom: blue
 colorTo: purple
@@ -10,9 +10,39 @@ pinned: false
 license: apache-2.0
 ---
 
-# LingBot World — Image to World Generator
+# video-world-lingbot — LingBot World (image → world)
 
 This Space is a Gradio front-end for **LingBot-World**, an open image-to-video world model built on **Wan 2.2** with **camera-pose conditioning**. Upload a starting image, describe the world in text, pick a camera trajectory, and generate a short world video (480p-class resolution, ~16 FPS).
+
+**Source code:** [github.com/amayvarghese/video-world-lingbot](https://github.com/amayvarghese/video-world-lingbot)
+
+## Hugging Face Space setup (name: `video-world-lingbot`)
+
+The public URL will be: `https://huggingface.co/spaces/<your_hf_username>/video-world-lingbot`
+
+### Option A — Create from the website (recommended)
+
+1. Open [Create new Space](https://huggingface.co/new-space).
+2. **Space name:** `video-world-lingbot` (must match this slug if you want the same URL).
+3. **SDK:** Gradio.
+4. **Hardware:** choose a **GPU** tier large enough for LingBot-World (multi‑GB weights; expect long first build).
+5. **Repo:** either leave empty and paste files, or under **“Import from GitHub”** pick  
+   [`amayvarghese/video-world-lingbot`](https://github.com/amayvarghese/video-world-lingbot), branch **`main`**, so the Space stays in sync with GitHub.
+6. Save — Hugging Face will run `pip install -r requirements.txt` from the repo root.
+
+### Option B — Push from your machine (CLI)
+
+With a [HF access token](https://huggingface.co/settings/tokens) (role: **write**):
+
+```bash
+cd /path/to/video-world-lingbot   # repo root: app.py lives here
+export HF_TOKEN=hf_your_token_here
+export HF_USERNAME=your_hf_username   # optional; defaults to amayvarghese in the script
+pip install huggingface_hub
+python scripts/deploy_hf_space.py
+```
+
+If your Hugging Face username is **not** `amayvarghese`, set `HF_USERNAME` so the Space is created under your account.
 
 ## Model and links
 
