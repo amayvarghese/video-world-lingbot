@@ -1,0 +1,21 @@
+torch>=2.1.0
+torchvision
+gradio==4.44.1
+gradio-client==1.3.0
+huggingface_hub>=0.23.0,<0.25.0
+diffusers>=0.27.0,<0.31.0
+transformers>=4.40.0,<4.46.0
+accelerate>=0.27.0
+imageio[ffmpeg]
+spaces
+numpy>=1.23.5,<2.0.0
+Pillow
+einops
+easydict
+opencv-python>=4.9.0,<4.10.0
+scipy
+ftfy
+regex
+tqdm
+imageio-ffmpeg
+lingbot-world @ git+https://github.com/robbyant/lingbot-world.git
