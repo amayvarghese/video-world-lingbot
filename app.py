@@ -198,17 +198,33 @@ def tensor_to_mp4(video: torch.Tensor, out_path: Path, fps: int = 16) -> str:
     return str(out_path)
 
 
+def _zero_gpu_space() -> bool:
+    """Hugging Face ZeroGPU: CUDA is not visible until code runs inside @spaces.GPU."""
+    return bool(os.environ.get("SPACES_ZERO_GPU"))
+
+
 def load_model_weights() -> None:
-    """Download (if needed) and construct WanI2V once at process startup."""
+    """Download (if needed) and construct WanI2V once (startup on GPU Space, or first Generate on ZeroGPU)."""
     global _WAN_I2V, _CKPT_DIR, _LOAD_ERR
     if _WAN_I2V is not None:
         return
+
+    if not _real_cuda_is_available():
+        if _zero_gpu_space():
+            # Defer heavy load + `wan` imports to run_inference (inside @spaces.GPU).
+            _LOAD_ERR = None
+            return
+        _WAN_I2V = None
+        _LOAD_ERR = (
+            "CUDA is not available. LingBot-World needs an NVIDIA GPU.\n\n"
+            "On Hugging Face Spaces: open your Space → choose **Hardware** → select a GPU "
+            "(e.g. T4, L4, A10G). **CPU Basic** cannot run this model."
+        )
+        return
+
     _LOAD_ERR = None
     try:
-        if not _real_cuda_is_available():
-            raise RuntimeError("CUDA is not available; LingBot-World inference requires a GPU.")
-
-        # `wan` imports call CUDA at module import time; defer until we know a GPU exists.
+        # `wan` imports call CUDA at module import time; only reach here when CUDA exists.
         _patch_wan_flash_attention()
         from wan.configs import WAN_CONFIGS  # noqa: E402
         from wan.image2video import WanI2V  # noqa: E402
@@ -262,6 +278,9 @@ def run_inference(
 
     action_dir: Optional[str] = None
     try:
+        if _WAN_I2V is None:
+            progress(0.02, desc="Loading model (first time can take several minutes)…")
+            load_model_weights()
         if _WAN_I2V is None:
             raise RuntimeError(_LOAD_ERR or "Model is not loaded. Check server logs.")
 
@@ -330,15 +349,25 @@ def run_inference(
 
 
 def build_demo():
-    device_badge = (
-        '<span style="display:inline-block;padding:0.25rem 0.6rem;border-radius:999px;'
-        'background:#14532d;color:#bbf7d0;font-weight:600;font-size:0.85rem;">'
-        "Running on GPU (CUDA)</span>"
-        if _real_cuda_is_available()
-        else '<span style="display:inline-block;padding:0.25rem 0.6rem;border-radius:999px;'
-        'background:#7f1d1d;color:#fecaca;font-weight:600;font-size:0.85rem;">'
-        "CPU only — full inference needs a CUDA GPU</span>"
-    )
+    if _real_cuda_is_available():
+        device_badge = (
+            '<span style="display:inline-block;padding:0.25rem 0.6rem;border-radius:999px;'
+            'background:#14532d;color:#bbf7d0;font-weight:600;font-size:0.85rem;">'
+            "Running on GPU (CUDA)</span>"
+        )
+    elif _zero_gpu_space():
+        device_badge = (
+            '<span style="display:inline-block;padding:0.25rem 0.6rem;border-radius:999px;'
+            'background:#1e3a5f;color:#bfdbfe;font-weight:600;font-size:0.85rem;">'
+            "ZeroGPU Space — GPU is allocated when you click <strong>Generate</strong> "
+            "(first run downloads weights, then loads the model)</span>"
+        )
+    else:
+        device_badge = (
+            '<span style="display:inline-block;padding:0.25rem 0.6rem;border-radius:999px;'
+            'background:#7f1d1d;color:#fecaca;font-weight:600;font-size:0.85rem;">'
+            "No CUDA GPU — upgrade Space hardware (T4 / L4 / A10G) to run LingBot</span>"
+        )
 
     intro = f"""
 <div style="max-width:920px;margin:0 auto 1rem auto;padding:1rem 1.25rem;border-radius:12px;
